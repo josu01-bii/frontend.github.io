@@ -6,24 +6,11 @@
   <title>Tienda Rápida</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      background-color: #fff5f5;
-      font-family: Arial, sans-serif;
-    }
-    h2 {
-      color: #b10000;
-      font-weight: bold;
-    }
-    .btn-primary {
-      background-color: #b10000;
-      border: none;
-    }
-    .btn-primary:hover {
-      background-color: #8a0000;
-    }
-    .form-control {
-      border: 2px solid #b10000;
-    }
+    body { background-color: #fff5f5; font-family: Arial, sans-serif; }
+    h2 { color: #b10000; font-weight: bold; }
+    .btn-primary { background-color: #b10000; border: none; }
+    .btn-primary:hover { background-color: #8a0000; }
+    .form-control { border: 2px solid #b10000; }
   </style>
 </head>
 <body class="container py-4">
@@ -39,11 +26,21 @@
   <div id="productos" class="d-none">
     <h4>Menú Disponible</h4>
     <ul id="lista" class="list-group mb-3"></ul>
+
+    <div id="admin-panel" class="d-none">
+      <h5>Agregar Producto</h5>
+      <input id="nombreProd" class="form-control mb-2" placeholder="Nombre">
+      <input id="precioProd" class="form-control mb-2" type="number" placeholder="Precio">
+      <input id="categoriaProd" class="form-control mb-2" placeholder="Categoría">
+      <button onclick="agregarProducto()" class="btn btn-success w-100 mb-3">Agregar</button>
+    </div>
+
     <button onclick="cargarProductos()" class="btn btn-secondary">Actualizar</button>
   </div>
 
   <script>
     let token = '';
+    let role = '';
 
     async function login() {
       const res = await fetch('https://backend-github-io-0vyh.onrender.com/api/login', {
@@ -54,14 +51,18 @@
           password: document.getElementById('pass').value
         })
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         token = data.token;
+        role = data.role;
         document.getElementById('login').classList.add('d-none');
         document.getElementById('productos').classList.remove('d-none');
+        if (role === 'admin') {
+          document.getElementById('admin-panel').classList.remove('d-none');
+        }
         cargarProductos();
       } else {
-        alert('Error al iniciar sesión');
+        alert(data || 'Error al iniciar sesión');
       }
     }
 
@@ -95,8 +96,31 @@
         lista.appendChild(li);
       });
     }
+
+    async function agregarProducto() {
+      const res = await fetch('https://backend-github-io-0vyh.onrender.com/api/productos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({
+          nombre: document.getElementById('nombreProd').value,
+          precio: document.getElementById('precioProd').value,
+          categoria: document.getElementById('categoriaProd').value
+        })
+      });
+      if (res.ok) {
+        alert('Producto agregado');
+        cargarProductos();
+      } else {
+        alert('Error al agregar producto');
+      }
+    }
   </script>
 </body>
 </html>
+
+
 
 
